@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings - LuxeStay{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-primary font-serif mb-8" data-aos="fade-down">My Bookings</h1>
+
+        <div class="space-y-6" data-aos="fade-up">
+            {% for booking in bookings %}
+            <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden flex flex-col md:flex-row">
+                <div class="md:w-1/4 h-48 md:h-auto bg-gray-200">
+                    {% if booking.room.room_type.hotel.images.first %}
+                    <img src="{{ booking.room.room_type.hotel.images.first.image.url }}"
+                        class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                        <i class="fa-solid fa-hotel text-4xl"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="p-6 md:w-3/4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-xl font-bold text-primary">{{ booking.room.room_type.hotel.name }}</h2>
+                            {% if booking.status == 'CONFIRMED' %}
+                            <span
+                                class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Confirmed</span>
+                            {% elif booking.status == 'PENDING' %}
+                            <span
+                                class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Pending</span>
+                            {% elif booking.status == 'CANCELED' %}
+                            <span
+                                class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Canceled</span>
+                            {% endif %}
+                        </div>
+
+                        <p class="text-gray-600 mb-4">{{ booking.room.room_type.name }} - Room {{
+                            booking.room.room_number }}</p>
+
+                        <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                            <div class="bg-gray-50 p-3 rounded border">
+                                <span class="block text-gray-500 text-xs uppercase font-bold mb-1">Check-in</span>
+                                <span class="font-medium text-gray-900">{{ booking.check_in }}</span>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded border">
+                                <span class="block text-gray-500 text-xs uppercase font-bold mb-1">Check-out</span>
+                                <span class="font-medium text-gray-900">{{ booking.check_out }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t">
+                        <div class="text-lg font-bold text-primary">Total: ${{ booking.total_price }}</div>
+                        <div class="space-x-2 flex">
+                            {% if booking.status == 'PENDING' %}
+                            <a href="{% url 'stripe_checkout' booking.id %}"
+                                class="bg-accent hover:bg-yellow-600 text-primary font-bold py-2 px-4 rounded transition text-sm">Pay
+                                Now</a>
+                            {% endif %}
+                            {% if booking.status != 'CANCELED' %}
+                            <form method="POST" action="{% url 'cancel_booking' booking.id %}"
+                                onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="border border-red-500 text-red-500 hover:bg-red-50 font-bold py-2 px-4 rounded transition text-sm">Cancel</button>
+                            </form>
+                            {% endif %}
+                            {% if booking.status == 'CONFIRMED' %}
+                            <a href="{% url 'download_invoice' booking.id %}"
+                                class="border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold py-2 px-4 rounded transition text-sm">Invoice</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-white rounded-xl shadow p-12 text-center text-gray-500 border border-gray-100">
+                <i class="fa-solid fa-suitcase-rolling text-5xl mb-4 text-gray-300"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No bookings yet</h3>
+                <p>Looks like you haven't booked any hotels yet.</p>
+                <a href="{% url 'hotel_list' %}"
+                    class="inline-block mt-4 bg-primary hover:bg-blue-900 text-white font-bold py-2 px-6 rounded transition">Explore
+                    Hotels</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LuxeStay - Advanced Hotel Booking System{% endblock %}</title>
+    <!-- Tailwind CSS (via CDN for dev) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A1F44',
+                        accent: '#D4AF37',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- AOS CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased overflow-x-hidden">
+
+    <!-- Navbar -->
+    <nav class="bg-primary text-white shadow-lg fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-hotel text-accent"></i>
+                        <span class="tracking-wider">LuxeStay</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="hover:text-accent transition duration-300">Home</a>
+                    <a href="#" class="hover:text-accent transition duration-300">Hotels</a>
+                    <a href="#" class="hover:text-accent transition duration-300">About</a>
+                    <a href="#" class="hover:text-accent transition duration-300">Contact</a>
+                    
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'ADMIN' %}
+                            <a href="#" class="hover:text-accent transition duration-300">Admin Panel</a>
+                        {% elif user.role == 'HOTEL_MANAGER' %}
+                            <a href="#" class="hover:text-accent transition duration-300">Manager Dashboard</a>
+                        {% else %}
+                            <a href="#" class="hover:text-accent transition duration-300">My Bookings</a>
+                        {% endif %}
+                        <form action="{% url 'logout' %}" method="post" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-300 shadow-md">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="hover:text-accent transition duration-300">Login</a>
+                        <a href="{% url 'register' %}" class="bg-accent hover:bg-yellow-600 text-primary font-semibold px-4 py-2 rounded-md transition duration-300 shadow-md">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="min-h-screen pt-16">
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 mt-4">
+                {% for message in messages %}
+                    <div class="p-4 mb-4 rounded-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-blue-100 text-blue-700{% endif %}" data-aos="fade-down">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white py-12 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-xl font-bold mb-4 text-accent"><i class="fa-solid fa-hotel"></i> LuxeStay</h3>
+                <p class="text-gray-300">Experience luxury and comfort with our premium hotel booking system.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4 text-lg">Quick Links</h4>
+                <ul class="space-y-2 text-gray-300">
+                    <li><a href="/" class="hover:text-accent transition duration-300">Home</a></li>
+                    <li><a href="#" class="hover:text-accent transition duration-300">All Hotels</a></li>
+                    <li><a href="#" class="hover:text-accent transition duration-300">Offers</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4 text-lg">Support</h4>
+                <ul class="space-y-2 text-gray-300">
+                    <li><a href="#" class="hover:text-accent transition duration-300">FAQ</a></li>
+                    <li><a href="#" class="hover:text-accent transition duration-300">Contact Us</a></li>
+                    <li><a href="#" class="hover:text-accent transition duration-300">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4 text-lg">Newsletter</h4>
+                <form class="flex">
+                    <input type="email" placeholder="Your email" class="px-4 py-2 rounded-l-md w-full text-gray-800 focus:outline-none">
+                    <button type="button" class="bg-accent hover:bg-yellow-600 px-4 py-2 rounded-r-md text-primary font-bold transition duration-300">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div class="text-center text-gray-400 mt-8 pt-8 border-t border-gray-700">
+            &copy; 2026 LuxeStay. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 10) {
+                navbar.classList.add('shadow-lg', 'bg-opacity-95', 'backdrop-blur-md');
+            } else {
+                navbar.classList.remove('shadow-lg', 'bg-opacity-95', 'backdrop-blur-md');
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
